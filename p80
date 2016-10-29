@@ -1,0 +1,11 @@
+#!/bin/bash 
+
+command=$(netstat -ln | grep -E ':80' | wc -l)
+
+if [[ $command -gt 0 ]]; then 
+	echo "Apache server is listening on port 80"
+else 
+	echo "Apache server is not listening on port 80"
+fi 
+ 
+ 

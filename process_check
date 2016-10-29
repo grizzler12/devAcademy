@@ -1,0 +1,20 @@
+#!/bin/bash
+# apache process check 
+# author: Alexandru Salajan
+
+# variables
+service="httpd"
+comand=$(ps -ef | grep -v grep | grep $service | wc -l)
+
+# main function 
+
+if [[  $comand -gt 0 ]]
+then 
+	echo "$service is running"
+else 
+	echo "$service is down"
+	$(systemctl restart httpd)
+	$(echo "Service httpd is down. We will atempt a restart of the service." | mail -s "Service httpd is down" grizzly@devacademy.ro)
+fi
+
+

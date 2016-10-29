@@ -1,0 +1,69 @@
+#!/bin/bash 
+
+# A script that will assure apache server is running and site is accesible
+# author: Alexandru Salajan
+
+ProcessCheck () {
+
+	service="httpd"
+	command=$(ps -ef | grep -v grep | grep $service | wc -l)
+
+	if [[  $command -gt 0 ]]; then 
+		echo "$service is running"
+	else 
+		echo "$service is down"
+		$(systemctl restart httpd)
+		$(echo "Service httpd is down. We will atempt a restart of the service." | mail -s "Service httpd is down" grizzly@devacademy.ro)
+	fi
+}
+
+Port () {
+
+	command2=$(netstat -ln | grep -E ':80' | wc -l)
+	
+	if [[ $command2 -gt 0 ]]; then 
+		echo "Apache server is listening on port 80"
+	else 
+		echo "Apache server is not listening on port 80"
+		$(systemctl restart httpd)
+		$(echo "Apache is not listening on port 80. We will atempt a restart of the httpd service." | mail -s "Service httpd is down" grizzly@devacademy.ro)
+	fi 
+ 
+}
+
+UrlCode () {
+
+	command3=$(curl -o /dev/null --silent --head --write-out '%{http_code}\n' http://192.168.122.1/phpinfo.php)
+
+
+	if [[ $command3 -eq 200 ]]; then 
+		echo "Site is up and running"
+	else 
+		echo "site is down"
+		$(systemctl restart httpd)
+		$(echo "The page is unreachable. We will atempt a restart of the httpd service." | mail -s "Service httpd is down" grizzly@devacademy.ro)
+	fi  
+
+}
+
+Word () {
+
+
+command4=$(curl http://192.168.122.1/phpinfo.php --silent | grep devacademy | wc -l )
+
+if [[ $command4 -gt 0 ]]; then 
+	echo "We found $command4 matches"
+else 
+	echo "No match"
+	$(systemctl restart httpd)
+	$(echo "We will atempt a restart of the httpd service." | mail -s "Service httpd is down" grizzly@devacademy.ro)
+fi 
+}
+
+ProcessCheck
+Port
+UrlCode
+Word
+
+
+

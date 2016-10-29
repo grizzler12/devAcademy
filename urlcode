@@ -1,0 +1,12 @@
+#!/bin/bash
+
+command=$(curl -o /dev/null --silent --head --write-out '%{http_code}\n' http://192.168.122.1/phpinfo.php)
+
+
+if [[ $command -eq 200 ]]; then 
+	echo "Site is up and running"
+else 
+	echo "site is down"
+fi  
+
+

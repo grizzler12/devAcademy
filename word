@@ -1,0 +1,9 @@
+#!/bin/bash
+
+command=$(curl http://192.168.122.1/phpinfo.php --silent | grep devacademy | wc -l )
+
+if [[ $command -gt 0 ]]; then 
+	echo $command
+else 
+	echo "nu merge"
+fi 
