@@ -1,12 +1,14 @@
-#!/bin/bash 
+#!/bin/bash
 
 # A script that will assure apache server is running and site is accesible
 # author: Alexandru Salajan
 
 
 err=0
+count=0
 
 
+# check if httpd service is running
 ProcessCheck () {
 
 	service="httpd"
@@ -21,6 +23,7 @@ ProcessCheck () {
 	fi
 }
 
+# check if apache is listening on port 80   
 Port () {
 
 	command2=$(netstat -ln | grep -E ':80' | wc -l)
@@ -35,6 +38,7 @@ Port () {
  
 }
 
+# check if url status is 200
 UrlCode () {
 
 	command3=$(curl -o /dev/null --silent --head --write-out '%{http_code}\n' http://192.168.122.1/phpinfo.php)
@@ -50,6 +54,7 @@ UrlCode () {
 
 }
 
+# check if word devacademy is present on the webpage
 Word () {
 
 
@@ -63,15 +68,37 @@ else
 		err=$((err+1))
 fi 
 }
+
+#main function 
 Main () {
-ProcessCheck>>/home/grizzly/bin/process.txt
-Port>>/home/grizzly/bin/port.txt
-UrlCode>>/home/grizzly/bin/url.txt
-Word>>/home/grizzly/bin/word.txt
-echo $err
-if [[ $err -gt 0 ]]; then 
-	systemctl restart httpd
-fi
+	ProcessCheck>>/home/grizzly/bin/process.txt
+	Port>>/home/grizzly/bin/port.txt
+	UrlCode>>/home/grizzly/bin/url.txt
+	Word>>/home/grizzly/bin/word.txt
+	
+	if [[ $err -gt 0 ]]; then 
+		systemctl restart httpd
+		count=$((count+1))
+		
+	else 
+		ProcessCheck>>/home/grizzly/bin/process.txt
+		Port>>/home/grizzly/bin/port.txt
+		UrlCode>>/home/grizzly/bin/url.txt
+		Word>>/home/grizzly/bin/word.txt
+		exit 0
+		
+	fi
 }
-Main 
+
+# if the script was checked 5 times and still has an error sends mail 
+while [[ $count -lt 5 ]];do 
+	Main
+done
+while [[ $count -gt 4 ]]; do 
+	echo "eroare">>fatal.txt
+	echo "After 5 service restarts error still persist." | mail -s "Fatal error" root@devacademy.ro
+	exit 1
+	
+done
+
 
