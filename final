@@ -3,6 +3,9 @@
 # A script that will assure apache server is running and site is accesible
 # author: Alexandru Salajan
 
+# Am pus scriptul in cronjobs astfel : 
+#   */2 08-18 * * * /home/grizzly/bin/final
+
 
 err=0
 count=0
